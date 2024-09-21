@@ -1,7 +1,8 @@
-const { Client, GatewayIntentBits, SlashCommandBuilder, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, SlashCommandBuilder, Routes, EmbedBuilder } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { token, clientId, guildId } = require('./config.json');
 const fs = require('fs');
+require('web-streams-polyfill/ponyfill'); // Add this line
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -32,7 +33,11 @@ client.on('interactionCreate', async interaction => {
     } else if (commandName === 'birthdays') {
         const upcomingBirthdays = await getUpcomingBirthdays();
         console.log(`Upcoming birthdays: ${upcomingBirthdays}`);
-        await interaction.reply({ content: upcomingBirthdays, ephemeral: false });
+        const embed = new EmbedBuilder()
+            .setTitle('Upcoming Birthdays')
+            .setDescription(upcomingBirthdays)
+            .setColor(0x00AE86);
+        await interaction.reply({ embeds: [embed], ephemeral: false });
     } else if (commandName === 'remove-birthday') {
         if (interaction.user.id in birthdays || interaction.member.permissions.has('ADMINISTRATOR')) {
             delete birthdays[interaction.user.id];
@@ -46,6 +51,24 @@ client.on('interactionCreate', async interaction => {
         if (interaction.member.permissions.has('ADMINISTRATOR')) {
             birthdayChannel = interaction.channel.id;
             await interaction.reply({ content: 'Birthday channel set!', ephemeral: true });
+        } else {
+            await interaction.reply({ content: 'You do not have permission to use this command!', ephemeral: true });
+        }
+    } else if (commandName === 'test') {
+        if (interaction.member.permissions.has('ADMINISTRATOR')) {
+            const channel = client.channels.cache.get(birthdayChannel);
+            if (channel) {
+                const images = fs.readdirSync('./images');
+                const image = images[Math.floor(Math.random() * images.length)];
+                channel.send({
+                    content: `Happy Birthday <@${interaction.user.id}>!`,
+                    files: [`./images/${image}`],
+                    embeds: [{ description: `Happy Birthday!`, image: { url: `attachment://${image}` } }]
+                });
+                await interaction.reply({ content: 'Test birthday message sent!', ephemeral: true });
+            } else {
+                await interaction.reply({ content: 'Birthday channel is not set.', ephemeral: true });
+            }
         } else {
             await interaction.reply({ content: 'You do not have permission to use this command!', ephemeral: true });
         }
@@ -109,7 +132,10 @@ const commands = [
         .setDescription('Remove your birthday'),
     new SlashCommandBuilder()
         .setName('set-channel')
-        .setDescription('Set the channel for birthday pings')
+        .setDescription('Set the channel for birthday pings'),
+    new SlashCommandBuilder()
+        .setName('test')
+        .setDescription('Test the birthday ping (admin only)')
 ].map(command => command.toJSON());
 
 const rest = new REST({ version: '9' }).setToken(token);
@@ -129,7 +155,7 @@ const rest = new REST({ version: '9' }).setToken(token);
     }
 })();
 
-
+// Birthday ping logic
 setInterval(() => {
     const now = new Date();
     if (now.getUTCHours() === 11 && now.getUTCMinutes() === 0) { // 6am USC time is 11am UTC
