@@ -1,5 +1,17 @@
 {
+  "name": "birthdaybotpromax",
+  "version": "1.0.1",
+  "description": "A birthday bot without the bullshit.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "EphraimK",
+  "license": "MIT",
   "dependencies": {
-    "discord.js": "^14.16.2"
+    "@discordjs/rest": "^2.4.0",
+    "discord.js": "^14.16.2",
+    "node-fetch": "^3.3.2",
+    "web-streams-polyfill": "^4.0.0"
   }
 }

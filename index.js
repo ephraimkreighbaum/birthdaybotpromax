@@ -2,7 +2,9 @@ const { Client, GatewayIntentBits, SlashCommandBuilder, Routes, EmbedBuilder } =
 const { REST } = require('@discordjs/rest');
 const { token, clientId, guildId } = require('./config.json');
 const fs = require('fs');
-require('web-streams-polyfill/ponyfill'); // Add this line
+const { ReadableStream } = require('web-streams-polyfill'); // Correct import path
+
+global.ReadableStream = ReadableStream; // Polyfill ReadableStream
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -100,7 +102,7 @@ async function getUpcomingBirthdays() {
         .slice(0, 10)
         .map(({ username, date, showAge, age }) => {
             const dateString = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-            return showAge ? `${username}: ${dateString} (Age: ${age})` : `${username}: ${dateString}`;
+            return showAge ? `${username}: ${dateString} (Turning: ${age})` : `${username}: ${dateString}`;
         })
         .join('\n') || 'No upcoming birthdays!';
 }
