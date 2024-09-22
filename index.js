@@ -102,7 +102,7 @@ async function getUpcomingBirthdays() {
         .slice(0, 10)
         .map(({ username, date, showAge, age }) => {
             const dateString = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-            return showAge ? `${username}: ${dateString} (Turning: ${age})` : `${username}: ${dateString}`;
+            return showAge ? `**${username}**: ${dateString} (Turning: ${age})` : `**${username}**: ${dateString}`;
         })
         .join('\n') || 'No upcoming birthdays!';
 }
@@ -169,7 +169,7 @@ setInterval(() => {
                     const images = fs.readdirSync('./images');
                     const image = images[Math.floor(Math.random() * images.length)];
                     channel.send({
-                        content: `Happy Birthday <@${id}>!`,
+                        content: `## Happy Birthday <@${id}>!`,
                         files: [`./images/${image}`],
                         embeds: [{ description: `Happy Birthday!`, image: { url: `attachment://${image}` } }]
                     });
