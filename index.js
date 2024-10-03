@@ -2,7 +2,7 @@ const { Client, GatewayIntentBits, SlashCommandBuilder, Routes, EmbedBuilder } =
 const { REST } = require('@discordjs/rest');
 const { token, clientId, guildId } = require('./config.json');
 const fs = require('fs');
-const { ReadableStream } = require('web-streams-polyfill'); // Correct import path
+const { ReadableStream } = require('web-streams-polyfill');
 
 global.ReadableStream = ReadableStream; // Polyfill ReadableStream
 
@@ -52,7 +52,7 @@ client.on('interactionCreate', async interaction => {
     } else if (commandName === 'set-channel') {
         if (interaction.member.permissions.has('ADMINISTRATOR')) {
             birthdayChannel = interaction.channel.id;
-            await interaction.reply({ content: 'Birthday channel set!', ephemeral: true });
+            await interaction.reply({ content: `Birthday channel set to <#${birthdayChannel}>!`, ephemeral: true });
         } else {
             await interaction.reply({ content: 'You do not have permission to use this command!', ephemeral: true });
         }
@@ -102,7 +102,7 @@ async function getUpcomingBirthdays() {
         .slice(0, 10)
         .map(({ username, date, showAge, age }) => {
             const dateString = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-            return showAge ? `**${username}**: ${dateString} (Turning: ${age})` : `**${username}**: ${dateString}`;
+            return showAge ? `${username}: ${dateString} (Age: ${age})` : `${username}: ${dateString}`;
         })
         .join('\n') || 'No upcoming birthdays!';
 }
@@ -157,22 +157,28 @@ const rest = new REST({ version: '9' }).setToken(token);
     }
 })();
 
-// Birthday ping logic
+// Birthday ping logic with debugging
 setInterval(() => {
     const now = new Date();
+    console.log(`Checking birthdays at ${now.toISOString()}`);
     if (now.getUTCHours() === 11 && now.getUTCMinutes() === 0) { // 6am USC time is 11am UTC
         const today = now.toISOString().slice(0, 10);
+        console.log(`Today's date: ${today}`);
         for (const [id, { date }] of Object.entries(birthdays)) {
+            console.log(`Checking birthday for user ${id}: ${date}`);
             if (date === today && birthdayChannel) {
                 const channel = client.channels.cache.get(birthdayChannel);
                 if (channel) {
                     const images = fs.readdirSync('./images');
                     const image = images[Math.floor(Math.random() * images.length)];
                     channel.send({
-                        content: `## Happy Birthday <@${id}>!`,
+                        content: `Happy Birthday <@${id}>!`,
                         files: [`./images/${image}`],
                         embeds: [{ description: `Happy Birthday!`, image: { url: `attachment://${image}` } }]
                     });
+                    console.log(`Sent birthday message to user ${id}`);
+                } else {
+                    console.log('Birthday channel not found');
                 }
             }
         }
