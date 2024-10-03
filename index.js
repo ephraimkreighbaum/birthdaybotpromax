@@ -65,7 +65,7 @@ client.on('interactionCreate', async interaction => {
                 channel.send({
                     content: `Happy Birthday <@${interaction.user.id}>!`,
                     files: [`./images/${image}`],
-                    embeds: [{ description: `Happy Birthday!`, image: { url: `attachment://${image}` } }]
+                    embeds: [{ description: `**Happy Birthday!**`, image: { url: `attachment://${image}` } }]
                 });
                 await interaction.reply({ content: 'Test birthday message sent!', ephemeral: true });
             } else {
@@ -157,7 +157,7 @@ const rest = new REST({ version: '9' }).setToken(token);
     }
 })();
 
-// Birthday ping logic with debugging
+// Birthday ping logic with detailed debugging
 setInterval(() => {
     const now = new Date();
     console.log(`Checking birthdays at ${now.toISOString()}`);
@@ -169,14 +169,18 @@ setInterval(() => {
             if (date === today && birthdayChannel) {
                 const channel = client.channels.cache.get(birthdayChannel);
                 if (channel) {
+                    console.log(`Found birthday channel: ${birthdayChannel}`);
                     const images = fs.readdirSync('./images');
                     const image = images[Math.floor(Math.random() * images.length)];
                     channel.send({
                         content: `Happy Birthday <@${id}>!`,
                         files: [`./images/${image}`],
-                        embeds: [{ description: `Happy Birthday!`, image: { url: `attachment://${image}` } }]
+                        embeds: [{ description: `**Happy Birthday!**`, image: { url: `attachment://${image}` } }]
+                    }).then(() => {
+                        console.log(`Sent birthday message to user ${id}`);
+                    }).catch(error => {
+                        console.error(`Failed to send birthday message to user ${id}:`, error);
                     });
-                    console.log(`Sent birthday message to user ${id}`);
                 } else {
                     console.log('Birthday channel not found');
                 }
