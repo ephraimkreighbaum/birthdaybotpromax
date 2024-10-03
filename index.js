@@ -102,7 +102,7 @@ async function getUpcomingBirthdays() {
         .slice(0, 10)
         .map(({ username, date, showAge, age }) => {
             const dateString = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-            return showAge ? `${username}: ${dateString} (Age: ${age})` : `${username}: ${dateString}`;
+            return showAge ? `**${username}**: ${dateString} (Age: ${age})` : `**${username}**: ${dateString}`;
         })
         .join('\n') || 'No upcoming birthdays!';
 }
@@ -161,7 +161,7 @@ const rest = new REST({ version: '9' }).setToken(token);
 setInterval(() => {
     const now = new Date();
     console.log(`Checking birthdays at ${now.toISOString()}`);
-    if (now.getUTCHours() === 11 && now.getUTCMinutes() === 0) { // 6am USC time is 11am UTC
+    if (now.getUTCHours() === 23 && now.getUTCMinutes() === 25) { // 6am USC time is 11am UTC
         const today = now.toISOString().slice(0, 10);
         console.log(`Today's date: ${today}`);
         for (const [id, { date }] of Object.entries(birthdays)) {
